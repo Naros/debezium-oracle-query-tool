@@ -259,6 +259,14 @@ public class OracleConnection implements AutoCloseable {
         });
     }
 
+    public void executeQuery(String query, ResultSetConsumer consumer) throws SQLException {
+        query(query, rs -> {
+            while (rs.next()) {
+                consumer.accept(rs);
+            }
+        });
+    }
+
     private void query(String query, ResultSetConsumer consumer) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             try (ResultSet rs = statement.executeQuery(query)) {

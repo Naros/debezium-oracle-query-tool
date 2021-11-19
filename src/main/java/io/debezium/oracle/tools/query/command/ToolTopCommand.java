@@ -34,6 +34,7 @@ import picocli.CommandLine.HelpCommand;
 @Command(name = "dbzoqt", mixinStandardHelpOptions = true, versionProvider = VersionProviderWithConfigProvider.class, subcommands = {
         HelpCommand.class,
         InfoCommand.class,
+        LogsCommand.class,
         ListChangeEventsCommand.class
 }, description = "A command-line query tool for Oracle by Debezium")
 public class ToolTopCommand {
