@@ -102,6 +102,10 @@ public class OracleConnection implements AutoCloseable {
         }
     }
 
+    public String getCompatibility() throws SQLException {
+        return queryAndMapSingleValue("SELECT name, value FROM v$parameter WHERE name = 'compatible'", rs -> rs.getString(2));
+    }
+
     /**
      * Get the list of available database names from the Oracle instance.
      *

@@ -40,6 +40,8 @@ public class InfoCommand extends AbstractCommand {
             System.out.println(connection.getBanner());
             System.out.println();
 
+            final String compatibility = connection.getCompatibility();
+
             // Display V$DATABASE
             System.out.println("V$DATABASE");
             System.out.println(Constants.SEPERATOR_SHORT);
@@ -48,7 +50,8 @@ public class InfoCommand extends AbstractCommand {
                 writeLine("Name", rs.getString("NAME"));
                 writeLine("Mode", rs.getString("OPEN_MODE"));
                 writeLine("Role", rs.getString("DATABASE_ROLE"));
-                writeLine("Platofmr", rs.getString("PLATFORM_NAME"));
+                writeLine("Platform", rs.getString("PLATFORM_NAME"));
+                writeLine("Compatibility", compatibility);
                 writeLine("Current SCN", rs.getString("CURRENT_SCN"));
                 writeLine("CDB", rs.getString("CDB"));
                 writeLine("Con ID", rs.getInt("CON_ID"));
