@@ -57,6 +57,7 @@
         <surefire-plugin.version>3.5.2</surefire-plugin.version>
         <impsort-plugin.version>1.12.0</impsort-plugin.version>
         <formatter-plugin.version>2.24.1</formatter-plugin.version>
+        <assembly-plugin.version>3.7.1</assembly-plugin.version>
 
         <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
@@ -228,7 +229,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>${assembly-plugin.version}</version>
                 <configuration>
                     <attach>false</attach>
                     <appendAssemblyId>false</appendAssemblyId>
