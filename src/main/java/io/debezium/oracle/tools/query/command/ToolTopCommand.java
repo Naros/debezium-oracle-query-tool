@@ -15,7 +15,7 @@
  */
 package io.debezium.oracle.tools.query.command;
 
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Produces;
 
 import io.debezium.oracle.tools.query.service.ExecutionExceptionHandler;
 import io.debezium.oracle.tools.query.service.VersionProviderWithConfigProvider;

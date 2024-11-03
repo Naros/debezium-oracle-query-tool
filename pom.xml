@@ -59,9 +59,11 @@
         <formatter-plugin.version>2.24.1</formatter-plugin.version>
         <assembly-plugin.version>3.7.1</assembly-plugin.version>
 
-        <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
+        <assertj.version>3.26.3</assertj.version>
+
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>2.4.2.Final</quarkus.platform.version>
+        <quarkus.platform.version>3.16.1</quarkus.platform.version>
 
         <artifactsDir>target</artifactsDir>
 
@@ -101,6 +103,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -140,7 +143,7 @@
                     <artifactId>impsort-maven-plugin</artifactId>
                     <version>${impsort-plugin.version}</version>
                     <configuration>
-                        <groups>java.,javax.,org.,com.</groups>
+                        <groups>java.,javax.,jakarta.,org.,com.</groups>
                         <removeUnused>true</removeUnused>
                         <staticAfter>true</staticAfter>
                     </configuration>
