@@ -59,6 +59,7 @@
         <formatter-plugin.version>2.24.1</formatter-plugin.version>
         <assembly-plugin.version>3.7.1</assembly-plugin.version>
         <license-plugin.version>4.6</license-plugin.version>
+        <os-plugin.version>1.7.1</os-plugin.version>
 
         <assertj.version>3.26.3</assertj.version>
 
@@ -120,7 +121,7 @@
             <extension>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>${os-plugin.version}</version>
             </extension>
         </extensions>
 
