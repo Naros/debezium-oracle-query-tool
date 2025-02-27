@@ -66,7 +66,8 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.19.0</quarkus.platform.version>
+        <quarkus.platform.version>3.19.1</quarkus.platform.version>
+
 
         <artifactsDir>target</artifactsDir>
 
