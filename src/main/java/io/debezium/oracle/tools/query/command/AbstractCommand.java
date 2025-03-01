@@ -15,7 +15,6 @@
  */
 package io.debezium.oracle.tools.query.command;
 
-import io.debezium.oracle.tools.query.service.OracleConnection;
 import picocli.CommandLine.Option;
 
 /**
@@ -40,7 +39,4 @@ public abstract class AbstractCommand implements Runnable {
     @Option(names = { "--port" }, defaultValue = "1521", description = "Database port")
     public String port;
 
-    protected OracleConnection createConnection() {
-        return new OracleConnection(hostName, port, serviceName, userName, password);
-    }
 }

@@ -21,6 +21,7 @@ import io.debezium.oracle.tools.query.service.ExecutionExceptionHandler;
 import io.debezium.oracle.tools.query.service.VersionProviderWithConfigProvider;
 import io.quarkus.picocli.runtime.PicocliCommandLineFactory;
 import io.quarkus.picocli.runtime.annotations.TopCommand;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;

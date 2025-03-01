@@ -15,14 +15,27 @@
  */
 package io.debezium.oracle.tools.query.command;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import io.debezium.oracle.tools.query.Constants;
+import com.github.freva.asciitable.AsciiTable;
+import com.github.freva.asciitable.Column;
+
 import io.debezium.oracle.tools.query.service.OracleConnection;
 import io.debezium.oracle.tools.query.service.OracleConnection.LogFile;
 import io.debezium.oracle.tools.query.util.HexConverter;
+import io.quarkus.runtime.util.StringUtil;
+
 import oracle.jdbc.OracleTypes;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -33,7 +46,7 @@ import picocli.CommandLine.Option;
  * @author Chris Cranford
  */
 @Command(name = "list-changes", description = "Lists all change events")
-public class ListChangeEventsCommand extends AbstractCommand {
+public class ListChangeEventsCommand extends AbstractDatabaseCommand {
 
     @Option(names = { "--start-scn" }, required = true, description = "Mining range starting point")
     public String startScn;
@@ -41,89 +54,120 @@ public class ListChangeEventsCommand extends AbstractCommand {
     @Option(names = { "--end-scn" }, required = true, description = "Mining range end point")
     public String endScn;
 
+    @Option(names = { "--show-logs" }, required = false, defaultValue = "false", description = "Whether to display mined log details to console")
+    public Boolean showMinedLogs;
+
+    @Option(names = { "--transaction" }, required = false, description = "Transaction id in hex that should only be mined between scn range")
+    public String transactionId;
+
+    @Option(names = { "--output" }, required = true, description = "CSV file name for writing mined data")
+    public String fileName;
+
+    public ListChangeEventsCommand() {
+        super(false);
+    }
+
     @Override
-    public void run() {
-        try (OracleConnection connection = createConnection()) {
-            // Display Oracle version
-            System.out.println(connection.getBanner());
-            System.out.println();
+    public void doRun(OracleConnection connection) throws SQLException {
 
-            // Display available databases
-            System.out.println("Databases: ");
-            System.out.println(Constants.SEPERATOR_SHORT);
-            for (String databaseName : connection.getDatabaseNames()) {
-                System.out.println(databaseName);
-            }
-            System.out.println();
+        final List<LogFile> logs = connection.getMineableLogFiles(startScn, endScn);
+        if (logs.isEmpty()) {
+            throw new RuntimeException("No logs found for the range [" + startScn + ", " + endScn + "]");
+        }
 
-            final List<LogFile> logs = connection.getMineableLogFiles(startScn, endScn);
-            if (logs.isEmpty()) {
-                throw new RuntimeException("No logs found for the range [" + startScn + ", " + endScn + "]");
-            }
-
+        if (showMinedLogs) {
             // Display logs
-            System.out.println("Registered Logs:");
-            System.out.println(Constants.SEPERATOR_SHORT);
-            for (LogFile log : logs) {
-                System.out.println(log.getFileName() + " [" + log.getFirstScn() + ", " + log.getNextScn() + "]");
-                connection.registerLogWithLogMiner(log);
+            System.out.println("Mineable Logs");
+            System.out.println(AsciiTable.getTable(logs, Arrays.asList(
+                    new Column().header("FILE_NAME").maxWidth(4000).with(LogFile::getFileName),
+                    new Column().header("FIRST_SCN").with(log -> log.getFirstScn().toString()),
+                    new Column().header("NEXT_SCN").with(log -> log.getNextScn().toString()))));
+            System.out.println();
+        }
+
+        // Register logs with LogMiner
+        for (LogFile log : logs) {
+            connection.registerLogWithLogMiner(log);
+        }
+
+        // Process results from mining session
+        connection.startMiningSession(startScn, endScn);
+        try {
+            final StringBuilder query = new StringBuilder();
+            query.append("SELECT * FROM V$LOGMNR_CONTENTS ");
+            query.append("WHERE SCN > ").append(startScn).append(" AND SCN <= ").append(endScn);
+            if (!StringUtil.isNullOrEmpty(transactionId)) {
+                query.append(" AND UPPER(RAWTOHEX(XID))=UPPER('").append(transactionId).append("')");
             }
-            System.out.println();
 
-            // Display information about mining session
-            System.out.println("Mining Session:");
-            System.out.println(Constants.SEPERATOR_SHORT);
-            System.out.println(String.format("%9s: %s %s", "Start SCN", startScn, "(greater-than, exclusive)"));
-            System.out.println(String.format("%9s: %s %s", "End SCN", endScn, "(less-than, inclusive)"));
-            System.out.println();
+            connection.query(query.toString(), rs -> {
+                try (PrintWriter writer = new PrintWriter(new FileOutputStream(fileName))) {
+                    // Write column names
+                    writer.println(columnNamesRow(rs));
 
-            // Start mining session
-            connection.startMiningSession(startScn, endScn);
-
-            // Process results from mining session
-            System.out.println(Constants.SEPERATOR_LONG);
-            connection.mineResults(startScn, endScn, rs -> {
-                final ResultSetMetaData metadata = rs.getMetaData();
-                while (rs.next()) {
-                    for (int i = 0; i < metadata.getColumnCount(); ++i) {
-                        final int columnIndex = i + 1;
-                        final String columnName = metadata.getColumnName(columnIndex);
-                        switch (metadata.getColumnType(columnIndex)) {
-                            case OracleTypes.VARCHAR:
-                            case OracleTypes.NVARCHAR:
-                                writeColumnNameAndValue(columnName, rs.getString(columnName));
-                                break;
-                            case OracleTypes.NUMERIC:
-                                writeColumnNameAndValue(columnName, rs.getLong(columnIndex));
-                                break;
-                            case OracleTypes.TIMESTAMP:
-                                writeColumnNameAndValue(columnName, rs.getTimestamp(columnName).toInstant());
-                                break;
-                            case OracleTypes.VARBINARY:
-                            case OracleTypes.RAW:
-                                writeColumnNameAndValue(columnName, getHexValue(rs.getBytes(columnName)));
-                                break;
-                            default:
-                                writeColumnNameAndValue(columnName, "Unknown column type " + metadata.getColumnType(columnIndex));
-                        }
+                    while (rs.next()) {
+                        writer.println(rowColumnValues(rs).stream().map(String::valueOf).collect(Collectors.joining(",")));
                     }
-                    System.out.println(Constants.SEPERATOR_LONG);
+
+                }
+                catch (FileNotFoundException e) {
+                    throw new RuntimeException("Failed to write output file", e);
                 }
             });
-
+        }
+        finally {
             // Stop mining session
             connection.endMiningSession();
         }
-        catch (SQLException e) {
-            throw new RuntimeException("Failed to get change events", e);
+    }
+
+    private String columnNamesRow(ResultSet rs) throws SQLException {
+        return IntStream.range(1, rs.getMetaData().getColumnCount())
+                .mapToObj(i -> {
+                    try {
+                        return "\"" + rs.getMetaData().getColumnName(i) + "\"";
+                    }
+                    catch (SQLException e) {
+                        throw new RuntimeException("Failed to read column at index " + i, e);
+                    }
+                })
+                .collect(Collectors.joining(","));
+    }
+
+    private List<Object> rowColumnValues(ResultSet rs) throws SQLException {
+        final ResultSetMetaData metadata = rs.getMetaData();
+        final int columnSize = metadata.getColumnCount();
+
+        final List<Object> row = new ArrayList<>(columnSize);
+        for (int i = 1; i <= columnSize; i++) {
+            row.add(columnValue(rs, i, metadata.getColumnType(i)));
         }
+
+        return row;
     }
 
-    private void writeColumnNameAndValue(String columnName, Object columnValue) {
-        System.out.println(String.format("%16s: ", columnName) + columnValue);
+    private Object columnValue(ResultSet rs, int columnIndex, int columnType) throws SQLException {
+        return switch (columnType) {
+            case OracleTypes.VARCHAR, OracleTypes.NVARCHAR -> quote(rs.getString(columnIndex), true);
+            case OracleTypes.NUMERIC -> rs.getLong(columnIndex);
+            case OracleTypes.TIMESTAMP -> quote(rs.getTimestamp(columnIndex));
+            case OracleTypes.VARBINARY, OracleTypes.RAW -> hex(rs.getBytes(columnIndex));
+            default -> "";
+        };
     }
 
-    private String getHexValue(byte[] value) {
-        return value != null ? HexConverter.convertToHexString(value) : "null";
+    private String quote(String value, boolean escapeQuotes) {
+        if (value == null) {
+            return "";
+        }
+        return escapeQuotes ? "\"" + value.replaceAll("\"", "\"\"") + "\"" : "\"" + value + "\"";
+    }
+
+    private String quote(Timestamp timestamp) {
+        return timestamp != null ? quote(timestamp.toInstant().toString(), false) : "";
+    }
+
+    private String hex(byte[] data) {
+        return data != null ? HexConverter.convertToHexString(data) : "";
     }
 }

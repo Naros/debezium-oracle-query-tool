@@ -17,8 +17,9 @@ package io.debezium.oracle.tools.query.command;
 
 import java.sql.SQLException;
 
-import io.debezium.oracle.tools.query.Constants;
 import io.debezium.oracle.tools.query.service.OracleConnection;
+import io.quarkus.runtime.util.StringUtil;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -28,74 +29,18 @@ import picocli.CommandLine.Option;
  * @author Chris Cranford
  */
 @Command(name = "logs", description = "Display information about Oracle tranasction logs")
-public class LogsCommand extends AbstractCommand {
+public class LogsCommand extends AbstractDatabaseCommand {
 
-    @Option(names = { "--since" }, required = true, description = "Specifies to list logs since the specified SCN")
+    @Option(names = { "--since" }, required = false, description = "Specifies to list logs since the specified SCN")
     private String sinceScn;
 
     @Override
-    public void run() {
-        try (OracleConnection connection = createConnection()) {
-            // Display Oracle version
-            System.out.println(connection.getBanner());
-            System.out.println();
+    public void doRun(OracleConnection connection) throws SQLException {
+        System.out.println(connection.exportTable("V$ARCHIVE_DEST_STATUS"));
 
-            System.out.println("Log Destinations");
-            System.out.println(Constants.SEPERATOR_SHORT);
-            connection.executeQuery(getLogDestinationStatusQuery(), rs -> {
-                writeLine("ID", rs.getLong("DEST_ID"));
-                writeLine("Name", rs.getString("DEST_NAME"));
-                writeLine("Status", rs.getString("STATUS"));
-                writeLine("Type", rs.getString("TYPE"));
-                writeLine("Location", rs.getString("DESTINATION"));
-                System.out.println(Constants.SEPERATOR_LONG);
-            });
-            System.out.println();
-
-            System.out.println("Logs Since " + sinceScn);
-            System.out.println(Constants.SEPERATOR_SHORT);
-            connection.executeQuery(getLogsSinceQuery(sinceScn), rs -> {
-                writeLine("FileName", rs.getString("NAME"));
-                final Long destId = rs.getLong("DEST_ID");
-                writeLine("Dest ID", destId == -1 ? "N/A" : destId);
-                writeLine("Thread ID", rs.getLong("THREAD#"));
-                writeLine("Sequence ID", rs.getLong("SEQUENCE#"));
-                writeLine("First Change", rs.getString("FIRST_CHANGE#"));
-                writeLine("Next Change", rs.getString("NEXT_CHANGE#"));
-                writeLine("Archived", rs.getString("ARCHIVED"));
-                writeLine("Deleted", rs.getString("DELETED"));
-                writeLine("Status", rs.getString("STATUS"));
-                System.out.println(Constants.SEPERATOR_LONG);
-            });
-            System.out.println();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException("Failed to execute logs command", e);
+        if (!StringUtil.isNullOrEmpty(sinceScn)) {
+            System.out.println(connection.exportQuery("Logs Since " + sinceScn, connection.getLogsSinceScnQuery(sinceScn)));
         }
     }
 
-    private String getLogsSinceQuery(String sinceScn) {
-        final StringBuilder query = new StringBuilder();
-        query.append("SELECT NAME, DEST_ID, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, ARCHIVED, DELETED, STATUS ");
-        query.append("FROM V$ARCHIVED_LOG ");
-        query.append("WHERE FIRST_CHANGE# >= ").append(sinceScn).append(" ");
-        query.append("UNION ALL ");
-        query.append("SELECT MIN(F.MEMBER), -1, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, 'NO', 'NO', 'REDO' ");
-        query.append("FROM V$LOG L, V$LOGFILE F ");
-        query.append("WHERE L.GROUP# = F.GROUP# ");
-        query.append("GROUP BY L.THREAD#, L.SEQUENCE#, L.FIRST_CHANGE#, L.NEXT_CHANGE#");
-        return query.toString();
-    }
-
-    private String getLogDestinationStatusQuery() {
-        final StringBuilder query = new StringBuilder();
-        query.append("SELECT ad.dest_id, ad.dest_name, ad.status, ads.TYPE, ads.destination ");
-        query.append("FROM v$archive_dest ad, v$archive_dest_status ads ");
-        query.append("WHERE ad.dest_id=ads.dest_id");
-        return query.toString();
-    }
-
-    private void writeLine(String name, Object value) {
-        System.out.println(String.format("%-14s: ", name) + value);
-    }
 }

@@ -102,55 +102,6 @@ public class OracleConnection implements AutoCloseable {
         }
     }
 
-    public String getCompatibility() throws SQLException {
-        return queryAndMapSingleValue("SELECT name, value FROM v$parameter WHERE name = 'compatible'", rs -> rs.getString(2));
-    }
-
-    /**
-     * Get the list of available database names from the Oracle instance.
-     *
-     * @return list of database names, never {@code null}
-     * @throws SQLException if a database error occurred
-     */
-    public List<String> getDatabaseNames() throws SQLException {
-        List<String> names = new ArrayList<>();
-        names.add(queryAndMapSingleValue("SELECT NAME FROM V$DATABASE", rs -> rs.getString(1)));
-
-        String cdb = null;
-        try {
-            cdb = queryAndMapSingleValue("SELECT CDB FROM V$DATABASE", rs -> rs.getString(1));
-        }
-        catch (SQLException e) {
-            // ignore working with CDB
-        }
-
-        if (!isNullOrEmpty(cdb) && "YES".equalsIgnoreCase(cdb)) {
-            query("SELECT NAME FROM V$CONTAINERS", rs -> {
-                while (rs.next()) {
-                    names.add(rs.getString(1));
-                }
-            });
-        }
-
-        return names;
-    }
-
-    /**
-     * Performs an Oracle LogMiner mining loop.
-     *
-     * @param startScn the starting mining range system change number, should never be {@code null}
-     * @param endScn the ending mining range system change number, should never be {@code null}
-     * @param consumer the result set consumer, should never be {@code null}
-     * @throws SQLException if a database error occurred
-     */
-    public void mineResults(String startScn, String endScn, ResultSetConsumer consumer) throws SQLException {
-        Objects.requireNonNull(startScn);
-        Objects.requireNonNull(endScn);
-        Objects.requireNonNull(consumer);
-
-        query(getLogMinerQuery(startScn, endScn), consumer);
-    }
-
     /**
      * Gathers a list of available logs based on the supplied mining range.
      *
@@ -226,9 +177,6 @@ public class OracleConnection implements AutoCloseable {
      * @throws SQLException if a database error occurred
      */
     public void startMiningSession(String startScn, String endScn) throws SQLException {
-        Objects.requireNonNull(startScn);
-        Objects.requireNonNull(endScn);
-
         try (Statement statement = connection.createStatement()) {
             final StringBuilder query = new StringBuilder();
             query.append("BEGIN sys.dbms_logmnr.start_logmnr");
@@ -251,28 +199,42 @@ public class OracleConnection implements AutoCloseable {
         }
     }
 
-    public void queryTable(String tableName, ResultSetConsumer consumer) throws SQLException {
-        query("SELECT * FROM " + tableName, rs -> {
-            while (rs.next()) {
-                consumer.accept(rs);
-            }
-        });
-    }
-
-    public void executeQuery(String query, ResultSetConsumer consumer) throws SQLException {
-        query(query, rs -> {
-            while (rs.next()) {
-                consumer.accept(rs);
-            }
-        });
-    }
-
-    private void query(String query, ResultSetConsumer consumer) throws SQLException {
+    public void query(String query, ResultSetConsumer consumer) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             try (ResultSet rs = statement.executeQuery(query)) {
                 consumer.accept(rs);
             }
         }
+    }
+
+    public String exportQuery(String header, String query) throws SQLException {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(header).append(System.lineSeparator());
+        try (Statement statement = connection.createStatement()) {
+            try (ResultSet rs = statement.executeQuery(query)) {
+                sb.append(ResultSetAsciiTable.from(rs));
+            }
+        }
+        sb.append(System.lineSeparator());
+        return sb.toString();
+    }
+
+    public String exportTable(String tableName) throws SQLException {
+        return exportQuery("Table: " + tableName, "SELECT * FROM " + tableName);
+    }
+
+    public String getLogsSinceScnQuery(String sinceScn) {
+        final StringBuilder query = new StringBuilder();
+        query.append("SELECT NAME, DEST_ID, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, ARCHIVED, DELETED, STATUS ");
+        query.append("FROM V$ARCHIVED_LOG ");
+        query.append("WHERE FIRST_CHANGE# >= ").append(sinceScn).append(" ");
+        query.append("UNION ALL ");
+        query.append("SELECT MIN(F.MEMBER), -1, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, 'NO', 'NO', 'REDO' ");
+        query.append("FROM V$LOG L, V$LOGFILE F ");
+        query.append("WHERE L.GROUP# = F.GROUP# ");
+        query.append("AND L.STATUS != 'INACTIVE' ");
+        query.append("GROUP BY L.THREAD#, L.SEQUENCE#, L.FIRST_CHANGE#, L.NEXT_CHANGE#");
+        return query.toString();
     }
 
     private String getMinableLogsQuery(String startScn, String endScn) {
@@ -310,15 +272,6 @@ public class OracleConnection implements AutoCloseable {
         else {
             query.append("AND UPPER(DEST_NAME)='").append(archiveDestinationName.toUpperCase()).append("'");
         }
-        return query.toString();
-    }
-
-    private String getLogMinerQuery(String startScn, String endScn) {
-        final StringBuilder query = new StringBuilder();
-        query.append(
-                "SELECT SCN, SQL_REDO, OPERATION_CODE, TIMESTAMP, XID, CSF, TABLE_NAME, SEG_OWNER, OPERATION, USERNAME, ROW_ID, ROLLBACK, RS_ID, SSN, SEQUENCE#, INFO, STATUS, OBJECT_ID ");
-        query.append("FROM V$LOGMNR_CONTENTS ");
-        query.append("WHERE SCN > ").append(startScn).append(" AND SCN <= ").append(endScn);
         return query.toString();
     }
 
