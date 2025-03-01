@@ -49,8 +49,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
@@ -175,6 +176,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
                 <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                     <parameters>${maven.compiler.parameters}</parameters>
                 </configuration>
             </plugin>
@@ -223,6 +227,12 @@
             <plugin>
                 <groupId>net.revelc.code</groupId>
                 <artifactId>impsort-maven-plugin</artifactId>
+                <configuration>
+                    <groups>java.,jakarta.,javax.,org.,com.,io.</groups>
+                    <staticGroups>*</staticGroups>
+                    <staticAfter>false</staticAfter>
+                    <removeUnused>true</removeUnused>
+                </configuration>
                 <executions>
                     <execution>
                         <id>sort-imports</id>
