@@ -36,7 +36,7 @@ public class InfoCommand extends AbstractDatabaseCommand {
         System.out.println(ResultSetAsciiTable.fromQuery(
                 connection,
                 "LogMiner-specific System Parameters",
-                "SELECT NAME, VALUE FROM V$PARAMETER WHERE NAME IN ('compatible')"));
+                "SELECT NAME, VALUE FROM V$PARAMETER WHERE NAME IN ('compatible', 'max_string_size', 'enable_goldengate_replication', 'undo_retention', 'common_user_prefix') ORDER BY NAME"));
 
         // Display V$DATABASE
         System.out.println(ResultSetAsciiTable.fromTable(connection, "V$DATABASE"));
