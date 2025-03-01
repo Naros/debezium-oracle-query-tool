@@ -18,6 +18,7 @@ package io.debezium.oracle.tools.query.command;
 import java.sql.SQLException;
 
 import io.debezium.oracle.tools.query.service.OracleConnection;
+import io.debezium.oracle.tools.query.service.ResultSetAsciiTable;
 import io.quarkus.runtime.util.StringUtil;
 
 import picocli.CommandLine.Command;
@@ -36,10 +37,13 @@ public class LogsCommand extends AbstractDatabaseCommand {
 
     @Override
     public void doRun(OracleConnection connection) throws SQLException {
-        System.out.println(connection.exportTable("V$ARCHIVE_DEST_STATUS"));
+        System.out.println(ResultSetAsciiTable.fromTable(connection, "V$ARCHIVE_DEST_STATUS"));
 
         if (!StringUtil.isNullOrEmpty(sinceScn)) {
-            System.out.println(connection.exportQuery("Logs Since " + sinceScn, connection.getLogsSinceScnQuery(sinceScn)));
+            System.out.println(ResultSetAsciiTable.fromQuery(
+                    connection,
+                    "Logs Since " + sinceScn,
+                    connection.getLogsSinceScnQuery(sinceScn)));
         }
     }
 

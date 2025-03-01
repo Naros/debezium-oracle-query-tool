@@ -31,10 +31,9 @@ import java.util.stream.IntStream;
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
 
+import io.debezium.oracle.tools.query.service.LogFile;
 import io.debezium.oracle.tools.query.service.OracleConnection;
-import io.debezium.oracle.tools.query.service.OracleConnection.LogFile;
 import io.debezium.oracle.tools.query.util.HexConverter;
-import io.quarkus.runtime.util.StringUtil;
 
 import oracle.jdbc.OracleTypes;
 import picocli.CommandLine.Command;
@@ -70,7 +69,7 @@ public class ListChangeEventsCommand extends AbstractDatabaseCommand {
     @Override
     public void doRun(OracleConnection connection) throws SQLException {
 
-        final List<LogFile> logs = connection.getMineableLogFiles(startScn, endScn);
+        final List<LogFile> logs = connection.getLogsSinceScn(startScn);
         if (logs.isEmpty()) {
             throw new RuntimeException("No logs found for the range [" + startScn + ", " + endScn + "]");
         }
@@ -85,39 +84,25 @@ public class ListChangeEventsCommand extends AbstractDatabaseCommand {
             System.out.println();
         }
 
-        // Register logs with LogMiner
-        for (LogFile log : logs) {
-            connection.registerLogWithLogMiner(log);
-        }
+        connection.createLogMinerContext()
+                .withLogs(logs)
+                .withStartScn(startScn)
+                .withEndScn(endScn)
+                .withTransactionId(transactionId)
+                .execute(this::writeLogMinerResults);
+    }
 
-        // Process results from mining session
-        connection.startMiningSession(startScn, endScn);
-        try {
-            final StringBuilder query = new StringBuilder();
-            query.append("SELECT * FROM V$LOGMNR_CONTENTS ");
-            query.append("WHERE SCN > ").append(startScn).append(" AND SCN <= ").append(endScn);
-            if (!StringUtil.isNullOrEmpty(transactionId)) {
-                query.append(" AND UPPER(RAWTOHEX(XID))=UPPER('").append(transactionId).append("')");
+    private void writeLogMinerResults(ResultSet rs) throws SQLException {
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(fileName))) {
+            // Write column names
+            writer.println(columnNamesRow(rs));
+
+            while (rs.next()) {
+                writer.println(rowColumnValues(rs).stream().map(String::valueOf).collect(Collectors.joining(",")));
             }
-
-            connection.query(query.toString(), rs -> {
-                try (PrintWriter writer = new PrintWriter(new FileOutputStream(fileName))) {
-                    // Write column names
-                    writer.println(columnNamesRow(rs));
-
-                    while (rs.next()) {
-                        writer.println(rowColumnValues(rs).stream().map(String::valueOf).collect(Collectors.joining(",")));
-                    }
-
-                }
-                catch (FileNotFoundException e) {
-                    throw new RuntimeException("Failed to write output file", e);
-                }
-            });
         }
-        finally {
-            // Stop mining session
-            connection.endMiningSession();
+        catch (FileNotFoundException e) {
+            throw new RuntimeException("Failed to write output file", e);
         }
     }
 
@@ -168,6 +153,6 @@ public class ListChangeEventsCommand extends AbstractDatabaseCommand {
     }
 
     private String hex(byte[] data) {
-        return data != null ? HexConverter.convertToHexString(data) : "";
+        return data != null ? "\"" + HexConverter.convertToHexString(data) + "\"" : "";
     }
 }

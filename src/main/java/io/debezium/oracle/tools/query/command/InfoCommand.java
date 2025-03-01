@@ -18,6 +18,7 @@ package io.debezium.oracle.tools.query.command;
 import java.sql.SQLException;
 
 import io.debezium.oracle.tools.query.service.OracleConnection;
+import io.debezium.oracle.tools.query.service.ResultSetAsciiTable;
 
 import picocli.CommandLine.Command;
 
@@ -32,13 +33,15 @@ public class InfoCommand extends AbstractDatabaseCommand {
     @Override
     protected void doRun(OracleConnection connection) throws SQLException {
         // Display variables
-        System.out.println(connection.exportQuery("LogMiner-specific System Parameters",
+        System.out.println(ResultSetAsciiTable.fromQuery(
+                connection,
+                "LogMiner-specific System Parameters",
                 "SELECT NAME, VALUE FROM V$PARAMETER WHERE NAME IN ('compatible')"));
 
         // Display V$DATABASE
-        System.out.println(connection.exportTable("V$DATABASE"));
+        System.out.println(ResultSetAsciiTable.fromTable(connection, "V$DATABASE"));
 
         // Display V$LOG
-        System.out.println(connection.exportTable("V$LOG"));
+        System.out.println(ResultSetAsciiTable.fromTable(connection, "V$LOG"));
     }
 }

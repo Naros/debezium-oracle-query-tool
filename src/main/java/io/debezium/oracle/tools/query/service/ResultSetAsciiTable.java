@@ -57,6 +57,17 @@ public class ResultSetAsciiTable {
         return AsciiTable.getTable(columns.toArray(new Column[0]), rows.toArray(new Object[0][]));
     }
 
+    public static String fromTable(OracleConnection connection, String tableName) throws SQLException {
+        return fromQuery(connection, "Table: " + tableName, "SELECT * FROM " + tableName);
+    }
+
+    public static String fromQuery(OracleConnection connection, String header, String query) throws SQLException {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(header).append(System.lineSeparator());
+        connection.query(query, rs -> sb.append(from(rs)));
+        return sb.append(System.lineSeparator()).toString();
+    }
+
     private ResultSetAsciiTable() {
 
     }
