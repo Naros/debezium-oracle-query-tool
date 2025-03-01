@@ -7,7 +7,7 @@ This tool allows you to execute specific commands that can obtain valuable infor
 ## Quickstart
 
 Before you can start using dbzoqt (Debezium Oracle Query Tool) you need to have configured your Oracle database as outlined by the Debezium for Oracle connector [documentation](https://debezium.io/documentation/reference/stable/connectors/oracle.adoc).
-This tool relies on the user account for the connector to be able to authenticate and perform specific read-only actions against the Oracle database in similar to that of the Debezium for Oracle connector.
+This tool relies on the user account for the connector to be able to authenticate and perform specific read-only actions against the Oracle database in similar to the Debezium for Oracle connector.
 
 Before using, you need to compile the tool from its source:
 
@@ -19,7 +19,7 @@ This will generate a runnable Java archive in `target/quarkus-app/quarkus-run.ja
 
 ## Usage
 
-The see the tools help, simply run `java -jar target/quarkus-app/quarkus-run.jar`, and it will show the following help output:
+To see the tools help, simply run `java -jar target/quarkus-app/quarkus-run.jar`, and it will show the following help output:
 ```shell script
 Usage: dbzoqt [-hV] [COMMAND]
 A command-line query tool for Oracle by Debezium
@@ -49,6 +49,7 @@ To use this command, several additional arguments are required:
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
 * `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
+* `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 
 An example would be:
 ```shell
@@ -56,6 +57,7 @@ java -jar target/quarkus-app/quarkus-run.jar info \
   --hostname localhost \
   --username c##dbzuser \
   --password dbz \
+  --service ORCLCDB \
   --port 1521
 ```
 
@@ -101,6 +103,7 @@ To use this command, several additional arguments are required:
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
 * `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
+* `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 
 In addition, there is one optional argument:
 
@@ -113,6 +116,7 @@ java -jar target/quarkus-app/quarkus-run.jar logs \
   --username c##dbzuser \
   --password dbz \
   --port 1521 \
+  --service ORCLCDB \
   --since 3840000
 ```
 
@@ -211,6 +215,7 @@ To use this command, several additional arguments are required:
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
 * `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
+* `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property) 
 * `--start-scn` specifies the LogMiner mining range first system change number in the range 
 * `--end-scn` specifies the LogMiner mining range last system change number in the range
 * `--output` specifies the filename of the CSV where the mined data will be written
@@ -227,6 +232,7 @@ java -jar target/quarkus-app/quarkus-run.jar list-changes \
   --username c##dbzuser \
   --password dbz \
   --port 1521 \
+  --service ORCLCDB \
   --start-scn 3837000 \
   --end-scn 3840000 \
   --transaction 03000a00a2020000 \
