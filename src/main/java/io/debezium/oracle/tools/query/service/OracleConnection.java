@@ -328,9 +328,12 @@ public class OracleConnection implements AutoCloseable {
         private String startScn;
         private String endScn;
         private String transactionId;
+        private String columns;
+        private String groupBy;
 
         LogMinerContext(OracleConnection connection) {
             this.connection = connection;
+            this.columns = "*";
         }
 
         /**
@@ -374,6 +377,28 @@ public class OracleConnection implements AutoCloseable {
          */
         public LogMinerContext withTransactionId(String transactionId) {
             this.transactionId = transactionId;
+            return this;
+        }
+
+        /**
+         * Sets the desired column list for the query, defaults to all columns.
+         *
+         * @param columns the list of columns
+         * @return this context
+         */
+        public LogMinerContext withColumns(String columns) {
+            this.columns = columns;
+            return this;
+        }
+
+        /**
+         * Sets the desired group by.
+         *
+         * @param groupBy the group by expression
+         * @return this context
+         */
+        public LogMinerContext withGroupBy(String groupBy) {
+            this.groupBy = groupBy;
             return this;
         }
 
@@ -446,7 +471,7 @@ public class OracleConnection implements AutoCloseable {
          */
         private void queryContents(ResultSetConsumer consumer) throws SQLException {
             final StringBuilder query = new StringBuilder();
-            query.append("SELECT * FROM V$LOGMNR_CONTENTS WHERE 1=1");
+            query.append("SELECT ").append(columns).append(" FROM V$LOGMNR_CONTENTS WHERE 1=1");
 
             if (!StringUtil.isNullOrEmpty(startScn)) {
                 query.append(" AND SCN > ").append(startScn);
@@ -458,6 +483,10 @@ public class OracleConnection implements AutoCloseable {
 
             if (!StringUtil.isNullOrEmpty(transactionId)) {
                 query.append(" AND UPPER(RAWTOHEX(XID))=UPPER('").append(transactionId).append("')");
+            }
+
+            if (!StringUtil.isNullOrEmpty(groupBy)) {
+                query.append(" GROUP BY ").append(groupBy);
             }
 
             connection.query(query.toString(), consumer);

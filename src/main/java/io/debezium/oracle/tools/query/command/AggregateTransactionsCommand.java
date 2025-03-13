@@ -22,31 +22,30 @@ import io.debezium.oracle.tools.query.service.LogFile;
 import io.debezium.oracle.tools.query.service.OracleConnection;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 /**
- * A command to list all changes from Oracle LogMiner between a starting and ending SCN.
+ * Provides an aggregate output of all transactions within the range, with a count of all
+ * changes associated with each transaction.
  *
  * @author Chris Cranford
  */
-@Command(name = "list-changes", description = "Lists all change events")
-public class ListChangeEventsCommand extends AbstractLogMinerCommand {
+@Command(name = "transactions", description = "Generates an aggregate of changes per transaction")
+public class AggregateTransactionsCommand extends AbstractLogMinerCommand {
 
-    @Option(names = { "--transaction" }, required = false, description = "Transaction id in hex that should only be mined between scn range")
-    public String transactionId;
-
-    public ListChangeEventsCommand() {
+    public AggregateTransactionsCommand() {
         super(false);
     }
 
     @Override
-    public void doRun(OracleConnection connection) throws SQLException {
-        final List<LogFile> logs = connection.getLogsSinceScn(startScn);
+    protected void doRun(OracleConnection connection) throws SQLException {
+        final List<LogFile> logs = getLogs(connection);
         connection.createLogMinerContext()
                 .withLogs(logs)
                 .withStartScn(startScn)
                 .withEndScn(endScn)
-                .withTransactionId(transactionId)
+                .withColumns("UPPER(RAWTOHEX(XID)) AS TRANSACTION_ID, COUNT(1) AS COUNT")
+                .withGroupBy("UPPER(RAWTOHEX(XID))")
                 .execute(this::writeLogMinerResults);
     }
+
 }

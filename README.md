@@ -30,6 +30,7 @@ Commands:
   info          Displays database information
   logs          Displays information about Oracle transaction logs
   list-changes  Lists all change events  
+  transactions  Generates an aggregate of changes per transaction
 ```
 
 The following sections talk about each command.
@@ -277,6 +278,63 @@ An example of what `data.csv` looks like is as follows:
 
 > **_NOTE_:** 
 > The above output is the raw output from LogMiner.
+
+### Transactions - Performing a mining step and outputs aggregated transaction details
+
+The `transactions` command queries information from `V$LOGMNR_CONTENTS` performance view after creating a LogMiner session.
+This provides all changes between a start and end SCN range, creating a series of change counts by transaction.
+
+To use this command, several additional arguments are required:
+
+* `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
+* `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--port` specifies the Oracle port (same as Debezium's `database.port` property)
+* `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
+* `--start-scn` specifies the LogMiner mining range first system change number in the range
+* `--end-scn` specifies the LogMiner mining range last system change number in the range
+* `--output` specifies the filename of the CSV where the mined data will be written
+
+In addition, there are optional arguments:
+
+* `--show-logs` specifies whether the logs used by the mining session are output to the console
+
+An example would be:
+```shell
+java -jar target/quarkus-app/quarkus-run.jar transactions \
+  --hostname localhost \
+  --username c##dbzuser \
+  --password dbz \
+  --port 1521 \
+  --service ORCLCDB \
+  --start-scn 3837000 \
+  --end-scn 3840000 \
+  --show-logs \
+  --output data.csv
+```
+
+Because the command specified `--show-logs`, the console will show output similar to the following, which describes all Oracle transaction logs (archive and online) that were used in the mining session based on the provided start and end SCN range:
+
+```
+Mineable Logs
++-----------------------------------------------------------------------------------------+-----------+---------------------+
+| FILE_NAME                                                                               | FIRST_SCN | NEXT_SCN            |
++-----------------------------------------------------------------------------------------+-----------+---------------------+
+| /opt/oracle/oradata/recovery_area/ORCLCDB/archivelog/2025_02_28/o1_mf_1_6_mw4dqmhj_.arc |   3836046 |             4014251 |
++-----------------------------------------------------------------------------------------+-----------+---------------------+
+| /opt/oracle/oradata/recovery_area/ORCLCDB/archivelog/2025_03_01/o1_mf_1_7_mw5q3l1c_.arc |   4014251 |             4191041 |
++-----------------------------------------------------------------------------------------+-----------+---------------------+
+|                                                  /opt/oracle/oradata/ORCLCDB/redo02.log |   4191041 | 9295429630892703743 |
++-----------------------------------------------------------------------------------------+-----------+---------------------+
+```
+
+In addition, a new file will have been created called `data.csv`, which contains the transaction aggregated details from the `V$LOGMNR_CONTENTS` view.
+An example of what `data.csv` looks like is as follows:
+
+```
+"TRANASCTION_ID","COUNT"
+"03000a00a2020000",25
+```
 
 ## Submitting Debezium for Oracle Jira issues
 

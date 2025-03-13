@@ -36,7 +36,8 @@ import picocli.CommandLine.HelpCommand;
         HelpCommand.class,
         InfoCommand.class,
         LogsCommand.class,
-        ListChangeEventsCommand.class
+        ListChangeEventsCommand.class,
+        AggregateTransactionsCommand.class
 }, description = "A command-line query tool for Oracle by Debezium")
 public class ToolTopCommand {
     @Produces
