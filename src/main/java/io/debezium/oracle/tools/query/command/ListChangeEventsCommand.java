@@ -35,6 +35,9 @@ public class ListChangeEventsCommand extends AbstractLogMinerCommand {
     @Option(names = { "--transaction" }, required = false, description = "Transaction id in hex that should only be mined between scn range")
     public String transactionId;
 
+    @Option(names = { "--exclude-internal" }, required = false, defaultValue = "false", description = "Excludes internal operations")
+    public boolean excludeInternalOps;
+
     public ListChangeEventsCommand() {
         super(false);
     }
@@ -47,6 +50,7 @@ public class ListChangeEventsCommand extends AbstractLogMinerCommand {
                 .withStartScn(startScn)
                 .withEndScn(endScn)
                 .withTransactionId(transactionId)
+                .withExcludeInternalOps(excludeInternalOps)
                 .execute(this::writeLogMinerResults);
     }
 }

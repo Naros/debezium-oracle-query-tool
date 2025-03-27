@@ -219,6 +219,7 @@ To use this command, several additional arguments are required:
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property) 
 * `--start-scn` specifies the LogMiner mining range first system change number in the range 
 * `--end-scn` specifies the LogMiner mining range last system change number in the range
+* `--exclude-internal` specifies that all `INTERNAL` operations should be excluded from the change list
 * `--output` specifies the filename of the CSV where the mined data will be written
 
 In addition, there are optional arguments:

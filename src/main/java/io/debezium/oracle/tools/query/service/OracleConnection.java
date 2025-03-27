@@ -330,6 +330,7 @@ public class OracleConnection implements AutoCloseable {
         private String transactionId;
         private String columns;
         private String groupBy;
+        private boolean excludeInternalOps;
 
         LogMinerContext(OracleConnection connection) {
             this.connection = connection;
@@ -377,6 +378,17 @@ public class OracleConnection implements AutoCloseable {
          */
         public LogMinerContext withTransactionId(String transactionId) {
             this.transactionId = transactionId;
+            return this;
+        }
+
+        /**
+         * Sets whether to exclude {@code INTERNAL} operations from the change listing.
+         *
+         * @param excludeInternalOps true to exclude internal operations, false to include them
+         * @return this context
+         */
+        public LogMinerContext withExcludeInternalOps(boolean excludeInternalOps) {
+            this.excludeInternalOps = excludeInternalOps;
             return this;
         }
 
@@ -483,6 +495,10 @@ public class OracleConnection implements AutoCloseable {
 
             if (!StringUtil.isNullOrEmpty(transactionId)) {
                 query.append(" AND UPPER(RAWTOHEX(XID))=UPPER('").append(transactionId).append("')");
+            }
+
+            if (excludeInternalOps) {
+                query.append(" AND OPERATION_CODE != 0");
             }
 
             if (!StringUtil.isNullOrEmpty(groupBy)) {
