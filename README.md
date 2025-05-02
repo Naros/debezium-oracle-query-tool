@@ -226,6 +226,7 @@ In addition, there are optional arguments:
 
 * `--show-logs` specifies whether the logs used by the mining session are output to the console
 * `--transaction` specifies an additional predicate to limit the mined data just for the specified transaction id in hex
+* `--destination-name` specifies the name of the archive destination to source log files from
 
 An example would be:
 ```shell

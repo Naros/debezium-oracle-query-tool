@@ -189,13 +189,14 @@ public class OracleConnection implements AutoCloseable {
      * Gathers a list of available logs based on the supplied system change number range.
      *
      * @param startScn the starting range system change number, should never be {@code null}
+     * @param destinationName the log destination name, may be {@code null}
      * @return list of logs, never {@code null}
      * @throws SQLException if a database exception is thrown
      */
-    public List<LogFile> getLogsSinceScn(String startScn) throws SQLException {
+    public List<LogFile> getLogsSinceScn(String startScn, String destinationName) throws SQLException {
         Objects.requireNonNull(startScn, "A start scn must be supplied to fetch logs.");
 
-        return queryAndMap(mineableLogsQuery(startScn, false, null, Duration.ZERO), rs -> {
+        return queryAndMap(mineableLogsQuery(startScn, false, destinationName, Duration.ZERO), rs -> {
             final List<LogFile> archiveLogs = new ArrayList<>();
             final List<LogFile> onlineLogs = new ArrayList<>();
 

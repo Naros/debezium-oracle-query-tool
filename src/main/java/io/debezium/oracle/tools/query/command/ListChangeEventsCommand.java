@@ -44,7 +44,7 @@ public class ListChangeEventsCommand extends AbstractLogMinerCommand {
 
     @Override
     public void doRun(OracleConnection connection) throws SQLException {
-        final List<LogFile> logs = connection.getLogsSinceScn(startScn);
+        final List<LogFile> logs = getLogs(connection);
         connection.createLogMinerContext()
                 .withLogs(logs)
                 .withStartScn(startScn)

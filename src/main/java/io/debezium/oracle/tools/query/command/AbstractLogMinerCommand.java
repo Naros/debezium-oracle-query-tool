@@ -57,12 +57,15 @@ public abstract class AbstractLogMinerCommand extends AbstractDatabaseCommand {
     @Option(names = { "--output" }, required = true, description = "CSV file name for writing mined data")
     public String fileName;
 
+    @Option(names = { "--destination-name" }, required = false, description = "Set the archive log destination name")
+    public String destinationName;
+
     public AbstractLogMinerCommand(boolean showBanner) {
         super(showBanner);
     }
 
     protected List<LogFile> getLogs(OracleConnection connection) throws SQLException {
-        final List<LogFile> logs = connection.getLogsSinceScn(startScn);
+        final List<LogFile> logs = connection.getLogsSinceScn(startScn, destinationName);
         if (logs.isEmpty()) {
             throw new RuntimeException("No logs found for the range [" + startScn + ", " + endScn + "]");
         }
