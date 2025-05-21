@@ -69,8 +69,8 @@
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>3.22.3</quarkus.platform.version>
 
-
         <artifactsDir>target</artifactsDir>
+        <executable-suffix>.zip</executable-suffix>
 
     </properties>
 
@@ -201,6 +201,8 @@
                     <aggregate>true</aggregate>
                     <excludes>
                         <exclude>LICENSE.txt</exclude>
+                        <exclude>src/main/assembly/dbzoqt</exclude>
+                        <exclude>src/main/assembly/dbzoqt.bat</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -250,7 +252,7 @@
                 <configuration>
                     <attach>false</attach>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>dbzoqt-${project.version}-${os.detected.classifier}</finalName>
+                    <finalName>debezium-oracle-query-tool-${project.version}</finalName>
                     <outputDirectory>${app.distribution.directory}</outputDirectory>
                     <workDirectory>${project.build.directory}/assembly/work</workDirectory>
                     <skipAssembly>true</skipAssembly>
