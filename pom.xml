@@ -44,6 +44,13 @@
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:https://github.com/Naros/debezium-oracle-query-tool.git</connection>
+        <developerConnection>scm:git:https://github.com/Naros/debezium-oracle-query-tool.git</developerConnection>
+        <url>https://github.com/Naros/debezium-oracle-query-tool</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
