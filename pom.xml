@@ -68,7 +68,7 @@
         <assembly-plugin.version>3.7.1</assembly-plugin.version>
         <license-plugin.version>5.0.0</license-plugin.version>
         <os-plugin.version>1.7.1</os-plugin.version>
-        <jreleaser-plugin.version>1.19.0</jreleaser-plugin.version>
+        <jreleaser-plugin.version>1.20.0</jreleaser-plugin.version>
 
         <assertj.version>3.27.4</assertj.version>
 
