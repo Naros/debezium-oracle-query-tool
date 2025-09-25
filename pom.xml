@@ -70,7 +70,7 @@
         <os-plugin.version>1.7.1</os-plugin.version>
         <jreleaser-plugin.version>1.20.0</jreleaser-plugin.version>
 
-        <assertj.version>3.27.5</assertj.version>
+        <assertj.version>3.27.6</assertj.version>
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
