@@ -422,6 +422,9 @@ public class OracleConnection implements AutoCloseable {
          * @throws SQLException if a database error occurs
          */
         public void execute(ResultSetConsumer consumer) throws SQLException {
+            // Make sure we're in the container root, if not already
+            switchToCdbIfApplicable();
+
             // Register logs
             for (LogFile logFile : logs) {
                 addLogMinerLog(logFile.getFileName());
@@ -507,6 +510,18 @@ public class OracleConnection implements AutoCloseable {
             }
 
             connection.query(query.toString(), consumer);
+        }
+
+        private void switchToCdbIfApplicable() {
+            try {
+                final String cdb = connection.queryAndMap("SELECT CDB FROM V$DATABASE", rs -> rs.next() ? rs.getString("CDB") : null);
+                if ("YES".equals(cdb)) {
+                    connection.execute("ALTER SESSION SET CONTAINER=CDB$ROOT");
+                }
+            }
+            catch (SQLException e) {
+                // ignored
+            }
         }
     }
 }
