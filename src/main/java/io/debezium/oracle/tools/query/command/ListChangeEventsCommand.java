@@ -38,6 +38,9 @@ public class ListChangeEventsCommand extends AbstractLogMinerCommand {
     @Option(names = { "--exclude-internal" }, required = false, defaultValue = "false", description = "Excludes internal operations")
     public boolean excludeInternalOps;
 
+    @Option(names = { "--columns" }, required = false, defaultValue = "*", description = "Selected columns")
+    public String columns;
+
     public ListChangeEventsCommand() {
         super(false);
     }
@@ -49,6 +52,7 @@ public class ListChangeEventsCommand extends AbstractLogMinerCommand {
                 .withLogs(logs)
                 .withStartScn(startScn)
                 .withEndScn(endScn)
+                .withColumns(columns)
                 .withTransactionId(transactionId)
                 .withExcludeInternalOps(excludeInternalOps)
                 .execute(this::writeLogMinerResults);
