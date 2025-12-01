@@ -65,7 +65,7 @@
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
         <impsort-plugin.version>1.12.0</impsort-plugin.version>
         <formatter-plugin.version>2.29.0</formatter-plugin.version>
-        <assembly-plugin.version>3.7.1</assembly-plugin.version>
+        <assembly-plugin.version>3.8.0</assembly-plugin.version>
         <license-plugin.version>5.0.0</license-plugin.version>
         <os-plugin.version>1.7.1</os-plugin.version>
         <jreleaser-plugin.version>1.21.0</jreleaser-plugin.version>
