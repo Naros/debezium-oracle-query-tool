@@ -232,15 +232,17 @@ public class OracleConnection implements AutoCloseable {
 
     public String getLogsSinceScnQuery(String sinceScn) {
         final StringBuilder query = new StringBuilder();
-        query.append("SELECT NAME, DEST_ID, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, ARCHIVED, DELETED, STATUS ");
+        query.append(
+                "SELECT NAME, DEST_ID, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, ARCHIVED, DELETED, STATUS, BLOCK_SIZE * BLOCKS AS BYTES, BLOCKS, FIRST_TIME, NEXT_TIME, COMPLETION_TIME, IS_RECOVERY_DEST_FILE, RESETLOGS_ID, COMPRESSED ");
         query.append("FROM V$ARCHIVED_LOG ");
         query.append("WHERE FIRST_CHANGE# >= ").append(sinceScn).append(" ");
         query.append("UNION ALL ");
-        query.append("SELECT MIN(F.MEMBER), -1, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, 'NO', 'NO', 'REDO' ");
-        query.append("FROM V$LOG L, V$LOGFILE F ");
+        query.append(
+                "SELECT MIN(F.MEMBER), -1, THREAD#, SEQUENCE#, FIRST_CHANGE#, NEXT_CHANGE#, 'NO', 'NO', 'REDO', L.BYTES, L.BYTES / L.BLOCKSIZE, L.FIRST_TIME, L.NEXT_TIME, NULL, 'NO', 0, 'NO' ");
+        query.append("FROM V$LOG L, V$LOGFILE F, V$DATABASE D ");
         query.append("WHERE L.GROUP# = F.GROUP# ");
         query.append("AND L.STATUS != 'INACTIVE' ");
-        query.append("GROUP BY L.THREAD#, L.SEQUENCE#, L.FIRST_CHANGE#, L.NEXT_CHANGE#");
+        query.append("GROUP BY L.THREAD#, L.SEQUENCE#, L.FIRST_CHANGE#, L.NEXT_CHANGE#, L.BYTES, L.BYTES / L.BLOCKSIZE, L.FIRST_TIME, L.NEXT_TIME");
         return query.toString();
     }
 
