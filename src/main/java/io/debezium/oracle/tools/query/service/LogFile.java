@@ -36,8 +36,9 @@ public class LogFile {
     private final Type type;
     private final Long redoThread;
     private final Long bytes;
+    private final Long blocks;
 
-    public LogFile(String fileName, BigInteger firstScn, BigInteger nextScn, Long sequence, Type type, Long redoThread, Long bytes) {
+    public LogFile(String fileName, BigInteger firstScn, BigInteger nextScn, Long sequence, Type type, Long redoThread, Long bytes, Long blocks) {
         this.fileName = fileName;
         this.firstScn = firstScn;
         this.nextScn = nextScn;
@@ -45,6 +46,7 @@ public class LogFile {
         this.type = type;
         this.redoThread = redoThread;
         this.bytes = bytes;
+        this.blocks = blocks;
     }
 
     public String getFileName() {
@@ -75,6 +77,10 @@ public class LogFile {
         return bytes;
     }
 
+    public Long getBlocks() {
+        return blocks;
+    }
+
     @Override
     public String toString() {
         return "LogFile{" +
@@ -85,6 +91,7 @@ public class LogFile {
                 ", type=" + type +
                 ", redoThread=" + redoThread +
                 ", bytes=" + bytes +
+                ", blocks=" + blocks +
                 '}';
     }
 }

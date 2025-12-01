@@ -76,7 +76,9 @@ public abstract class AbstractLogMinerCommand extends AbstractDatabaseCommand {
             System.out.println(AsciiTable.getTable(logs, Arrays.asList(
                     new Column().header("FILE_NAME").maxWidth(4000).with(LogFile::getFileName),
                     new Column().header("FIRST_SCN").with(log -> log.getFirstScn().toString()),
-                    new Column().header("NEXT_SCN").with(log -> log.getNextScn().toString()))));
+                    new Column().header("NEXT_SCN").with(log -> log.getNextScn().toString()),
+                    new Column().header("BYTES").with(log -> log.getBytes().toString()),
+                    new Column().header("BLOCKS").with(log -> log.getBlocks().toString()))));
             System.out.println();
         }
 

@@ -207,14 +207,16 @@ public class OracleConnection implements AutoCloseable {
                 final String type = rs.getString(6);
                 final Long sequence = rs.getLong(7);
                 final Long redoThread = rs.getLong(10);
+                final Long bytes = rs.getLong(11);
+                final Long blocks = rs.getLong(12);
                 if ("ARCHIVED".equals(type)) {
-                    final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ARCHIVE, redoThread, 0L);
+                    final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ARCHIVE, redoThread, bytes, blocks);
                     if (log.getNextScn().compareTo(new BigInteger(startScn)) >= 0) {
                         archiveLogs.add(log);
                     }
                 }
                 else {
-                    final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ONLINE, redoThread, 0L);
+                    final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ONLINE, redoThread, bytes, blocks);
                     if (log.getNextScn().compareTo(new BigInteger(startScn)) >= 0) {
                         onlineLogs.add(log);
                     }
@@ -272,13 +274,15 @@ public class OracleConnection implements AutoCloseable {
             query.append("L.SEQUENCE# as SEQ, ");
             query.append("'NO' AS DICT_START, ");
             query.append("'NO' AS DICT_END, ");
-            query.append("L.THREAD# AS THREAD ");
+            query.append("L.THREAD# AS THREAD, ");
+            query.append("L.BYTES AS BYTES, ");
+            query.append("L.BYTES / L.BLOCKSIZE AS BLOCKS ");
             query.append("FROM V$LOGFILE F, V$LOG L LEFT JOIN V$ARCHIVED_LOG A ");
             query.append("ON A.FIRST_CHANGE# = L.FIRST_CHANGE# ");
             query.append("AND A.NEXT_CHANGE# = L.NEXT_CHANGE# ");
             query.append("WHERE A.FIRST_CHANGE# IS NULL ");
             query.append("AND F.GROUP# = L.GROUP# ");
-            query.append("GROUP BY F.GROUP#, L.FIRST_CHANGE#, L.NEXT_CHANGE#, L.STATUS, L.ARCHIVED, L.SEQUENCE#, L.THREAD# ");
+            query.append("GROUP BY F.GROUP#, L.FIRST_CHANGE#, L.NEXT_CHANGE#, L.STATUS, L.ARCHIVED, L.SEQUENCE#, L.THREAD#, L.BYTES, L.BYTES / L.BLOCKSIZE ");
             query.append("UNION ");
         }
         query.append("SELECT ");
@@ -291,7 +295,9 @@ public class OracleConnection implements AutoCloseable {
         query.append("A.SEQUENCE# AS SEQ, ");
         query.append("A.DICTIONARY_BEGIN AS DICT_BEGIN, ");
         query.append("A.DICTIONARY_END AS DICT_END, ");
-        query.append("A.THREAD# AS THREAD ");
+        query.append("A.THREAD# AS THREAD, ");
+        query.append("A.BLOCKS * A.BLOCK_SIZE AS BYTES, ");
+        query.append("A.BLOCKS AS BLOCKS ");
         query.append("FROM V$ARCHIVED_LOG A ");
         query.append("WHERE A.NAME IS NOT NULL ");
         query.append("AND A.ARCHIVED = 'YES' ");
