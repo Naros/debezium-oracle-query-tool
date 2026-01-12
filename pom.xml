@@ -63,7 +63,7 @@
 
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
-        <impsort-plugin.version>1.12.0</impsort-plugin.version>
+        <impsort-plugin.version>1.13.0</impsort-plugin.version>
         <formatter-plugin.version>2.29.0</formatter-plugin.version>
         <assembly-plugin.version>3.8.0</assembly-plugin.version>
         <license-plugin.version>5.0.0</license-plugin.version>
