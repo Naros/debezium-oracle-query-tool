@@ -31,6 +31,7 @@ Commands:
   logs          Displays information about Oracle transaction logs
   list-changes  Lists all change events  
   transactions  Generates an aggregate of changes per transaction
+  threads       Display information about Oracle's redo threads  
 ```
 
 The following sections talk about each command.
@@ -339,12 +340,39 @@ An example of what `data.csv` looks like is as follows:
 "03000a00a2020000",25
 ```
 
+### Threads - Displaying Oracle redo thread activity state
+
+The `threads` command queries information from `V$THREAD` performance view, which shows the current status of all redo threads in the Oracle database.
+A redo thread is a collection of changes made to Oracle by one instance on the Oracle cluster.
+
+To use this command, several additional arguments are required:
+
+* `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
+* `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--port` specifies the Oracle port (same as Debezium's `database.port` property)
+* `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
+
+An example of the output:
+
+```
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+Table: V$THREAD
++---------+--------+---------+--------+----------+-----------------------+----------------+-----------+--------------------+-----------------------+----------------+-----------------------+-----------------+--------------+---------------------+-----------------+-------------------+-----------------------+--------+
+| THREAD# | STATUS | ENABLED | GROUPS | INSTANCE | OPEN_TIME             | CURRENT_GROUP# | SEQUENCE# | CHECKPOINT_CHANGE# | CHECKPOINT_TIME       | ENABLE_CHANGE# | ENABLE_TIME           | DISABLE_CHANGE# | DISABLE_TIME | LAST_REDO_SEQUENCE# | LAST_REDO_BLOCK | LAST_REDO_CHANGE# | LAST_REDO_TIME        | CON_ID |
++---------+--------+---------+--------+----------+-----------------------+----------------+-----------+--------------------+-----------------------+----------------+-----------------------+-----------------+--------------+---------------------+-----------------+-------------------+-----------------------+--------+
+|       1 |   OPEN |  PUBLIC |      3 |  ORCLCDB | 2026-02-08 00:42:53.0 |              1 |        39 |            4860587 | 2026-02-12 10:00:04.0 |        1920977 | 2023-02-02 17:18:22.0 |               0 |              |                  39 |          387140 |           5040892 | 2026-02-13 02:47:53.0 |      0 |
++---------+--------+---------+--------+----------+-----------------------+----------------+-----------+--------------------+-----------------------+----------------+-----------------------+-----------------+--------------+---------------------+-----------------+-------------------+-----------------------+--------+
+```
+
 ## Submitting Debezium for Oracle Jira issues
 
 When you submit an upstream Debezium Jira issue for the Oracle connector, using this tool can be very useful to provide as much information about the environment as possible.
 While the Debezium Oracle connector log is useful, often times you cannot set the connector to `TRACE` or `DEBUG` level in perpetuity, and this provides a quick way to supplement the connector logs with that detail after the fact.
 
-When submitting Debezium Jira issues, please include the `list-changes` for the relevant SCN ranges or the transaction, as well as the `info` and `logs` outputs.
+When submitting Debezium Jira issues, please include the `list-changes` for the relevant SCN ranges or the transaction, as well as the `info`, `logs`, and `threads` outputs.
 
 ## License
 
