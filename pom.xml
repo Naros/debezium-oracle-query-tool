@@ -74,7 +74,8 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.34.3</quarkus.platform.version>
+        <quarkus.platform.version>3.34.4</quarkus.platform.version>
+        <chronique.queue.version>2026.2</chronique.queue.version>
 
         <artifactsDir>target</artifactsDir>
         <executable-suffix>.zip</executable-suffix>
@@ -122,6 +123,11 @@
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
             <version>23.26.1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-queue</artifactId>
+            <version>${chronique.queue.version}</version>
         </dependency>
     </dependencies>
 
