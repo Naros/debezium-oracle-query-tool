@@ -70,7 +70,8 @@
         <os-plugin.version>1.7.1</os-plugin.version>
         <jreleaser-plugin.version>1.24.0</jreleaser-plugin.version>
 
-        <assertj.version>3.27.7</assertj.version>
+	<assertj.version>3.27.7</assertj.version>
+	<oracle.jdbc.version>23.26.2.0.0</oracle.jdbc.version>
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
@@ -120,8 +121,8 @@
         </dependency>
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>23.26.1.0.0</version>
+            <artifactId>ojdbc17</artifactId>
+	    <version>${oracle.jdbc.version}</version>
         </dependency>
     </dependencies>
 
