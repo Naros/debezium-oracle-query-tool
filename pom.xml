@@ -71,7 +71,7 @@
         <jreleaser-plugin.version>1.25.0</jreleaser-plugin.version>
 
 	<assertj.version>3.27.7</assertj.version>
-	<oracle.jdbc.version>23.26.2.0.0</oracle.jdbc.version>
+	<oracle.jdbc.version>23.26.3.0.0</oracle.jdbc.version>
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
