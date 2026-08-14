@@ -1,3 +1,3 @@
 @echo off
 
-java -jar app/quarkus-run.jar %*
+java -jar "%~dp0app\quarkus-run.jar" %*

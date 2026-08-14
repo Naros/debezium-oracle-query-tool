@@ -1,3 +1,15 @@
 #!/bin/bash
 
-java -jar app/quarkus-run.jar "$@"
+# Resolve the real location of this script, following symlinks
+SOURCE="$0"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" > /dev/null 2>&1 && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  case "$SOURCE" in
+    /*) ;;
+    *) SOURCE="$DIR/$SOURCE" ;;
+  esac
+done
+DIR="$(cd -P "$(dirname "$SOURCE")" > /dev/null 2>&1 && pwd)"
+
+exec java -jar "$DIR/app/quarkus-run.jar" "$@"
