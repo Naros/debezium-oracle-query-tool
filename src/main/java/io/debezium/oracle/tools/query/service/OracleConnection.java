@@ -189,12 +189,16 @@ public class OracleConnection implements AutoCloseable {
      * Gathers a list of available logs based on the supplied system change number range.
      *
      * @param startScn the starting range system change number, should never be {@code null}
+     * @param endScn the ending range system change number, may be {@code null} for no upper bound
      * @param destinationName the log destination name, may be {@code null}
      * @return list of logs, never {@code null}
      * @throws SQLException if a database exception is thrown
      */
-    public List<LogFile> getLogsSinceScn(String startScn, String destinationName) throws SQLException {
+    public List<LogFile> getLogsInScnRange(String startScn, String endScn, String destinationName) throws SQLException {
         Objects.requireNonNull(startScn, "A start scn must be supplied to fetch logs.");
+
+        final BigInteger rangeStart = new BigInteger(startScn);
+        final BigInteger rangeEnd = !StringUtil.isNullOrEmpty(endScn) ? new BigInteger(endScn) : null;
 
         return queryAndMap(mineableLogsQuery(startScn, false, destinationName, Duration.ZERO), rs -> {
             final List<LogFile> archiveLogs = new ArrayList<>();
@@ -211,13 +215,13 @@ public class OracleConnection implements AutoCloseable {
                 final Long blocks = rs.getLong(12);
                 if ("ARCHIVED".equals(type)) {
                     final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ARCHIVE, redoThread, bytes, blocks);
-                    if (log.getNextScn().compareTo(new BigInteger(startScn)) >= 0) {
+                    if (isLogInScnRange(log, rangeStart, rangeEnd)) {
                         archiveLogs.add(log);
                     }
                 }
                 else {
                     final LogFile log = new LogFile(fileName, firstScn, nextScn, sequence, LogFile.Type.ONLINE, redoThread, bytes, blocks);
-                    if (log.getNextScn().compareTo(new BigInteger(startScn)) >= 0) {
+                    if (isLogInScnRange(log, rangeStart, rangeEnd)) {
                         onlineLogs.add(log);
                     }
                 }
@@ -254,6 +258,11 @@ public class OracleConnection implements AutoCloseable {
      */
     public LogMinerContext createLogMinerContext() {
         return new LogMinerContext(this);
+    }
+
+    private static boolean isLogInScnRange(LogFile log, BigInteger rangeStart, BigInteger rangeEnd) {
+        return log.getNextScn().compareTo(rangeStart) >= 0
+                && (rangeEnd == null || log.getFirstScn().compareTo(rangeEnd) <= 0);
     }
 
     private static String getBannerQuery(String fieldName) {
