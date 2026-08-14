@@ -49,7 +49,7 @@ To use this command, several additional arguments are required:
 
 * `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property) 
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
-* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property); pass `--password` with no value to be prompted, or omit it entirely to use the `DBZOQT_PASSWORD` environment variable
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 
@@ -103,7 +103,7 @@ To use this command, several additional arguments are required:
 
 * `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
-* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property); pass `--password` with no value to be prompted, or omit it entirely to use the `DBZOQT_PASSWORD` environment variable
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 
@@ -215,7 +215,7 @@ To use this command, several additional arguments are required:
 
 * `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
-* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property); pass `--password` with no value to be prompted, or omit it entirely to use the `DBZOQT_PASSWORD` environment variable
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property) 
 * `--start-scn` specifies the LogMiner mining range first system change number in the range 
@@ -292,7 +292,7 @@ To use this command, several additional arguments are required:
 
 * `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
-* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property); pass `--password` with no value to be prompted, or omit it entirely to use the `DBZOQT_PASSWORD` environment variable
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 * `--start-scn` specifies the LogMiner mining range first system change number in the range
@@ -349,7 +349,7 @@ To use this command, several additional arguments are required:
 
 * `--hostname` specifies the Oracle database instance hostname (same as Debezium's `database.hostname` property)
 * `--username` specifies the Oracle user account to connect with (same as Debezium's `database.user` property)
-* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property)
+* `--password` specifies the Oracle user account's password (same as Debezium's `database.password` property); pass `--password` with no value to be prompted, or omit it entirely to use the `DBZOQT_PASSWORD` environment variable
 * `--port` specifies the Oracle port (same as Debezium's `database.port` property)
 * `--service` specifies the Oracle service/sid name (same as Debezium's `database.dbname` property)
 
