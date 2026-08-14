@@ -62,6 +62,16 @@ jobs:
       - name: 'Build and stage artifacts'
         run: ./mvnw -B -Pdist,release deploy
 
+      # Tag the local release commit and push only the tag; the tag push transports the
+      # commit objects, so JReleaser releases from the exact bump commit while main remains
+      # unpushed. If the release fails, clean up with: git push --delete origin v<version>
+      - name: 'Tag release'
+        run: |
+          if ! git rev-parse -q --verify "refs/tags/v${{ github.event.inputs.version }}" > /dev/null; then
+            git tag "v${{ github.event.inputs.version }}"
+          fi
+          git push origin "refs/tags/v${{ github.event.inputs.version }}"
+
       - name: 'Release to GitHub and Maven Central'
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
