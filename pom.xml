@@ -380,6 +380,58 @@
                                         </java>
                                     </languages>
                                 </project>
+                                <release>
+                                    <github>
+                                        <changelog>
+                                            <formatted>ALWAYS</formatted>
+                                            <preset>conventional-commits</preset>
+                                            <categories>
+                                                <category>
+                                                    <key>dependencies</key>
+                                                    <title>📦 Dependencies</title>
+                                                    <order>50</order>
+                                                    <labels>
+                                                        <label>dependencies</label>
+                                                    </labels>
+                                                </category>
+                                                <category>
+                                                    <key>other</key>
+                                                    <title>🧹 Other</title>
+                                                    <order>999</order>
+                                                    <labels>
+                                                        <label>other</label>
+                                                    </labels>
+                                                </category>
+                                            </categories>
+                                            <labelers>
+                                                <labeler>
+                                                    <label>release-automation</label>
+                                                    <title>regex:^\[RELEASE\].*</title>
+                                                </labeler>
+                                                <labeler>
+                                                    <label>ci-automation</label>
+                                                    <title>regex:^\[ci\].*</title>
+                                                </labeler>
+                                                <labeler>
+                                                    <label>dependencies</label>
+                                                    <title>regex:^(Upgrade|Update).*\d.*</title>
+                                                </labeler>
+                                                <labeler>
+                                                    <label>other</label>
+                                                    <title>regex:.*</title>
+                                                    <order>999</order>
+                                                </labeler>
+                                            </labelers>
+                                            <excludeLabels>
+                                                <excludeLabel>release-automation</excludeLabel>
+                                                <excludeLabel>ci-automation</excludeLabel>
+                                            </excludeLabels>
+                                            <contributors>
+                                                <enabled>false</enabled>
+                                            </contributors>
+                                        </changelog>
+                                    </github>
+                                </release>
                                 <signing>
                                     <active>ALWAYS</active>
                                     <pgp>
