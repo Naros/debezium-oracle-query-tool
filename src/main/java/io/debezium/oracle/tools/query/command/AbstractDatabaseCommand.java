@@ -38,6 +38,10 @@ public abstract class AbstractDatabaseCommand extends AbstractCommand {
 
     @Override
     public void run() {
+        if (password == null) {
+            throw new RuntimeException("No password provided. Pass --password with a value, pass --password alone to be prompted, " +
+                    "or set the DBZOQT_PASSWORD environment variable.");
+        }
         try (OracleConnection connection = createConnection()) {
             if (showBanner) {
                 // Display Oracle version

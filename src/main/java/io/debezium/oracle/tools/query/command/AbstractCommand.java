@@ -30,7 +30,8 @@ public abstract class AbstractCommand implements Runnable {
     @Option(names = { "--username" }, required = true, description = "Authentication username")
     public String userName;
 
-    @Option(names = { "--password" }, required = true, description = "Authentication password")
+    @Option(names = {
+            "--password" }, arity = "0..1", interactive = true, defaultValue = "${env:DBZOQT_PASSWORD}", description = "Authentication password; when given without a value, prompts for it; when omitted, uses the DBZOQT_PASSWORD environment variable")
     public String password;
 
     @Option(names = { "--service" }, required = true, description = "Database service name")
