@@ -18,6 +18,7 @@ package io.debezium.oracle.tools.query.command;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -127,11 +128,15 @@ public abstract class AbstractLogMinerCommand extends AbstractDatabaseCommand {
     private Object columnValue(ResultSet rs, int columnIndex, int columnType) throws SQLException {
         return switch (columnType) {
             case OracleTypes.VARCHAR, OracleTypes.NVARCHAR -> quote(rs.getString(columnIndex), true);
-            case OracleTypes.NUMERIC -> rs.getLong(columnIndex);
+            case OracleTypes.NUMERIC -> numeric(rs.getBigDecimal(columnIndex));
             case OracleTypes.TIMESTAMP -> quote(rs.getTimestamp(columnIndex));
             case OracleTypes.VARBINARY, OracleTypes.RAW -> hex(rs.getBytes(columnIndex));
-            default -> "";
+            default -> quote(rs.getString(columnIndex), true);
         };
+    }
+
+    private String numeric(BigDecimal value) {
+        return value != null ? value.toPlainString() : "";
     }
 
     private String quote(String value, boolean escapeQuotes) {
