@@ -251,8 +251,8 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>${assembly-plugin.version}</version>
                 <configuration>
-                    <attach>false</attach>
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <attach>true</attach>
+                    <appendAssemblyId>true</appendAssemblyId>
                     <finalName>dbzoqt-${project.version}</finalName>
                     <outputDirectory>${app.distribution.directory}</outputDirectory>
                     <workDirectory>${project.build.directory}/assembly/work</workDirectory>
@@ -458,11 +458,11 @@
                                         <type>JAVA_BINARY</type>
                                         <artifacts>
                                             <artifact>
-                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}.tar.gz</path>
+                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}-dist.tar.gz</path>
                                                 <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}.tar.gz</transform>
                                             </artifact>
                                             <artifact>
-                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}.zip</path>
+                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}-dist.zip</path>
                                                 <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}.zip</transform>
                                             </artifact>
                                         </artifacts>
