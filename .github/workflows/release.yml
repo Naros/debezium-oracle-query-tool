@@ -45,13 +45,19 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      # The release version is committed locally only; nothing is pushed to main until the
+      # release has fully succeeded. JReleaser tags the local commit and pushes the tag,
+      # which carries the commit objects, so a failed release leaves main untouched.
       - name: 'Set release version'
         run: |
           ./mvnw -B versions:set -DnewVersion=${{ github.event.inputs.version }} -DgenerateBackupPoms=false
           git config user.name "GitHub Actions"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "[RELEASE] Bump version to ${{ github.event.inputs.version }}"
-          git push
+          if git diff --quiet; then
+            echo "Version is already ${{ github.event.inputs.version }}; skipping commit"
+          else
+            git commit -am "[RELEASE] Bump version to ${{ github.event.inputs.version }}"
+          fi
 
       - name: 'Build and stage artifacts'
         run: ./mvnw -B -Pdist,release deploy
@@ -65,6 +71,9 @@ jobs:
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.JRELEASER_MAVENCENTRAL_USERNAME }}
           JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.JRELEASER_MAVENCENTRAL_PASSWORD }}
         run: ./mvnw -B -Prelease jreleaser:full-release
+
+      - name: 'Push release commit'
+        run: git push origin HEAD:${{ github.ref_name }}
 
       - name: 'Set next development version'
         run: |
