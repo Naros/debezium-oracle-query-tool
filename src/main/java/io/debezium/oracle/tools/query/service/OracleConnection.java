@@ -538,7 +538,9 @@ public class OracleConnection implements AutoCloseable {
                 }
             }
             catch (SQLException e) {
-                // ignored
+                System.err.println("WARNING: Could not switch the session to CDB$ROOT (" + e.getMessage().trim() + "). "
+                        + "Mining will continue in the current container; if this is a CDB and the connected user "
+                        + "lacks the SET CONTAINER privilege, LogMiner queries may fail or return no results.");
             }
         }
     }
