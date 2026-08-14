@@ -19,11 +19,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.naros</groupId>
+    <groupId>io.github.naros</groupId>
     <artifactId>debezium-oracle-query-tool</artifactId>
     <version>1.2.0-SNAPSHOT</version>
     <name>Debezium Oracle Query CLI Tool</name>
     <description>Debezium Oracle query command line interface tool</description>
+    <url>https://github.com/Naros/debezium-oracle-query-tool</url>
+    <inceptionYear>2021</inceptionYear>
     <packaging>jar</packaging>
 
     <licenses>
@@ -67,7 +69,8 @@
         <formatter-plugin.version>2.29.0</formatter-plugin.version>
         <assembly-plugin.version>3.8.0</assembly-plugin.version>
         <license-plugin.version>5.1.1</license-plugin.version>
-        <os-plugin.version>1.7.1</os-plugin.version>
+        <source-plugin.version>3.3.1</source-plugin.version>
+        <javadoc-plugin.version>3.11.2</javadoc-plugin.version>
         <jreleaser-plugin.version>1.25.0</jreleaser-plugin.version>
 
 	<assertj.version>3.27.7</assertj.version>
@@ -77,8 +80,7 @@
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>3.38.1</quarkus.platform.version>
 
-        <artifactsDir>target</artifactsDir>
-        <executable-suffix>.zip</executable-suffix>
+        <app.distribution.directory>${project.build.directory}/distributions</app.distribution.directory>
 
     </properties>
 
@@ -127,15 +129,6 @@
     </dependencies>
 
     <build>
-        <!-- detect OS classifier, needed for distribution Zip file -->
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>${os-plugin.version}</version>
-            </extension>
-        </extensions>
-
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -260,7 +253,7 @@
                 <configuration>
                     <attach>false</attach>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>debezium-oracle-query-tool-${project.version}</finalName>
+                    <finalName>dbzoqt-${project.version}</finalName>
                     <outputDirectory>${app.distribution.directory}</outputDirectory>
                     <workDirectory>${project.build.directory}/assembly/work</workDirectory>
                     <skipAssembly>true</skipAssembly>
@@ -336,20 +329,41 @@
             </build>
         </profile>
         <profile>
-            <id>dist-windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <executable-suffix>.exe</executable-suffix>
-            </properties>
-        </profile>
-        <profile>
             <id>release</id>
+            <properties>
+                <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
+            </properties>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${javadoc-plugin.version}</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.jreleaser</groupId>
                         <artifactId>jreleaser-maven-plugin</artifactId>
@@ -360,26 +374,44 @@
                                     <snapshot>
                                         <label>{{ projectVersionNumber }}-early-access</label>
                                     </snapshot>
+                                    <languages>
+                                        <java>
+                                            <version>21</version>
+                                        </java>
+                                    </languages>
                                 </project>
+                                <signing>
+                                    <active>ALWAYS</active>
+                                    <pgp>
+                                        <armored>true</armored>
+                                    </pgp>
+                                </signing>
+                                <deploy>
+                                    <maven>
+                                        <mavenCentral>
+                                            <sonatype>
+                                                <active>RELEASE</active>
+                                                <url>https://central.sonatype.com/api/v1/publisher</url>
+                                                <applyMavenCentralRules>true</applyMavenCentralRules>
+                                                <stagingRepositories>
+                                                    <stagingRepository>target/staging-deploy</stagingRepository>
+                                                </stagingRepositories>
+                                            </sonatype>
+                                        </mavenCentral>
+                                    </maven>
+                                </deploy>
                                 <distributions>
                                     <dbzoqt>
                                         <name>dbzoqt</name>
-                                        <type>NATIVE_IMAGE</type>
+                                        <type>JAVA_BINARY</type>
                                         <artifacts>
                                             <artifact>
-                                                <path>{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.tar.gz</path>
-                                                <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}-linux-x86_64.tar.gz</transform>
-                                                <platform>linux-x86_64</platform>
+                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}.tar.gz</path>
+                                                <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}.tar.gz</transform>
                                             </artifact>
                                             <artifact>
-                                                <path>{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip</path>
-                                                <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}-windows-x86_64.zip</transform>
-                                                <platform>windows-x86_64</platform>
-                                            </artifact>
-                                            <artifact>
-                                                <path>{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip</path>
-                                                <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}-osx-x86_64.zip</transform>
-                                                <platform>osx-x86_64</platform>
+                                                <path>${app.distribution.directory}/{{distributionName}}-{{projectVersion}}.zip</path>
+                                                <transform>artifacts/{{distributionName}}-{{projectEffectiveVersion}}.zip</transform>
                                             </artifact>
                                         </artifacts>
                                     </dbzoqt>
