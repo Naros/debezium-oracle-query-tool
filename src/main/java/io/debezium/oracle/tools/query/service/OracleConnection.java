@@ -224,7 +224,8 @@ public class OracleConnection implements AutoCloseable {
             }
 
             // Deduplicate any logs
-            onlineLogs.forEach(l -> archiveLogs.removeIf(a -> a.getSequence().equals(l.getSequence())));
+            onlineLogs.forEach(l -> archiveLogs.removeIf(a -> a.getSequence().equals(l.getSequence())
+                    && a.getRedoThread().equals(l.getRedoThread())));
 
             return Stream.concat(archiveLogs.stream(), onlineLogs.stream()).collect(Collectors.toList());
         });
