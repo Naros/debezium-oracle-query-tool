@@ -21,7 +21,7 @@
 
     <groupId>io.github.naros</groupId>
     <artifactId>debezium-oracle-query-tool</artifactId>
-    <version>1.2.1.Final</version>
+    <version>1.2.2-SNAPSHOT</version>
     <name>Debezium Oracle Query CLI Tool</name>
     <description>Debezium Oracle query command line interface tool</description>
     <url>https://github.com/Naros/debezium-oracle-query-tool</url>
