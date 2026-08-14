@@ -66,7 +66,7 @@ public abstract class AbstractLogMinerCommand extends AbstractDatabaseCommand {
     }
 
     protected List<LogFile> getLogs(OracleConnection connection) throws SQLException {
-        final List<LogFile> logs = connection.getLogsSinceScn(startScn, destinationName);
+        final List<LogFile> logs = connection.getLogsInScnRange(startScn, endScn, destinationName);
         if (logs.isEmpty()) {
             throw new RuntimeException("No logs found for the range [" + startScn + ", " + endScn + "]");
         }
