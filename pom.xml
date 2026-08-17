@@ -69,7 +69,7 @@
         <formatter-plugin.version>2.29.0</formatter-plugin.version>
         <assembly-plugin.version>3.8.0</assembly-plugin.version>
         <license-plugin.version>5.1.1</license-plugin.version>
-        <source-plugin.version>3.3.1</source-plugin.version>
+        <source-plugin.version>3.4.0</source-plugin.version>
         <javadoc-plugin.version>3.11.2</javadoc-plugin.version>
         <jreleaser-plugin.version>1.25.0</jreleaser-plugin.version>
 
