@@ -78,7 +78,7 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.38.2</quarkus.platform.version>
+        <quarkus.platform.version>3.39.0</quarkus.platform.version>
 
         <app.distribution.directory>${project.build.directory}/distributions</app.distribution.directory>
 
